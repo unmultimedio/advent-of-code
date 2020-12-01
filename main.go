@@ -21,14 +21,17 @@ func puzzle1() {
 	}
 
 	for i := 0; i < len(values); i++ {
-		for j := i + 1; j < len(values)-1; j++ {
-			if values[i]+values[j] == 2020 {
-				fmt.Printf(
-					"[%d]: %d, [%d]: %d, (sum: 2020), (prod: %d)",
-					i, values[i],
-					j, values[j],
-					values[i]*values[j],
-				)
+		for j := i + 1; j < len(values); j++ {
+			for k := j + 1; k < len(values); k++ {
+				if values[i]+values[j]+values[k] == 2020 {
+					fmt.Printf(
+						"[%d]: %d, [%d]: %d, [%d]: %d, (sum: 2020), (prod: %d)",
+						i, values[i],
+						j, values[j],
+						k, values[k],
+						values[i]*values[j]*values[k],
+					)
+				}
 			}
 		}
 	}
