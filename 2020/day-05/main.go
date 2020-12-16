@@ -9,7 +9,14 @@ import (
 	"github.com/unmultimedio/adventofcode/util"
 )
 
+var available map[int]struct{}
+var taken map[int]struct{}
+
 func main() {
+	available = make(map[int]struct{})
+	taken = make(map[int]struct{})
+	preparePlane()
+
 	boardingPasses, _ := util.ReadLines("./input")
 
 	var maxID int
@@ -18,9 +25,30 @@ func main() {
 		if id > maxID {
 			maxID = id
 		}
+
+		taken[id] = struct{}{}
+		delete(available, id)
 	}
 
-	fmt.Println(maxID)
+	fmt.Printf("the max id is: %d\n", maxID)
+
+	for id := range available {
+		_, bef := taken[id-1]
+		_, aft := taken[id+1]
+		if bef && aft {
+			fmt.Printf("my seat has id: %d\n", id)
+			break
+		}
+	}
+
+}
+
+func preparePlane() {
+	for r := 0; r < 127; r++ {
+		for c := 0; c < 7; c++ {
+			available[seatID(r, c)] = struct{}{}
+		}
+	}
 }
 
 var boardingPassRx = regexp.MustCompile(`\A(F|B){7}(R|L){3}\z`)
@@ -59,5 +87,9 @@ func decodeBoardingPass(pass string) (row int, column int, id int) {
 	}
 	column = int(c)
 
-	return row, column, (row * 8) + column
+	return row, column, seatID(row, column)
+}
+
+func seatID(row, column int) int {
+	return (row * 8) + column
 }
