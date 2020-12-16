@@ -22,12 +22,43 @@ func main() {
 		numbers = append(numbers, n)
 	}
 
-	for i := preamble; i < len(numbers); i++ {
-		if !isValid(i) {
-			fmt.Printf("invalid number %d at index %d\n", numbers[i], i)
-			return
+	// for i := preamble; i < len(numbers); i++ {
+	// 	if !isValid(i) {
+	// 		fmt.Printf("invalid number %d at index %d\n", numbers[i], i)
+	// 		return
+	// 	}
+	// }
+	const firstInvalidNumber = 1124361034
+
+	set := contiguosSetFor(firstInvalidNumber)
+	min, max := set[0], set[0]
+	for _, n := range set {
+		if n > max {
+			max = n
+		}
+		if n < min {
+			min = n
 		}
 	}
+	fmt.Printf("smallest: %d, largest: %d, sum: %d\n", min, max, min+max)
+}
+
+func contiguosSetFor(target int) []int {
+	for i := 0; i < len(numbers); i++ {
+		var acc int
+		for j := i; j < len(numbers); j++ {
+			acc += numbers[j]
+			if acc == target {
+				fmt.Printf("set found for target %d at (%d,%d)\n", target, i, j)
+				return numbers[i:j]
+			}
+			if acc > target {
+				break
+			}
+		}
+	}
+
+	panic(fmt.Sprintf("couldn't find a contiguos set for number: %d", target))
 }
 
 func isValid(idx int) bool {
