@@ -15,27 +15,28 @@ type rule struct {
 }
 
 var shinyGoldContainers map[string]struct{}
+var rules map[string]rule
 
 func main() {
 	shinyGoldContainers = make(map[string]struct{})
+	rules = make(map[string]rule)
 
 	rulesRaw, _ := util.ReadLines("./input")
 
-	var rules []rule
 	for _, ruleRaw := range rulesRaw {
 		rule, err := decodeRule(ruleRaw)
 		if err != nil {
 			fmt.Printf("skipped rule %q, err: %v\n", ruleRaw, err)
 		}
-		rules = append(rules, rule)
+		rules[rule.container] = rule
 		// fmt.Println(rule)
 	}
 
-	completeShinyGoldInspection(rules)
+	completeShinyGoldInspection()
 	fmt.Printf("amount of bags that can contain shiny gold bags: %d\n", len(shinyGoldContainers))
 }
 
-func completeShinyGoldInspection(rules []rule) {
+func completeShinyGoldInspection() {
 	var newContainersAdded int
 	for _, rule := range rules {
 		containersCopy := shinyGoldContainers
@@ -49,7 +50,7 @@ func completeShinyGoldInspection(rules []rule) {
 		}
 	}
 	if newContainersAdded > 0 {
-		completeShinyGoldInspection(rules)
+		completeShinyGoldInspection()
 	}
 }
 
@@ -62,6 +63,13 @@ func decodeRule(r string) (rule, error) {
 		return rule{}, errors.New(`rule has no " contain " divisor, no bags suffix in parts[0] or no final dot in part[1]`)
 	}
 	containerBag := parts[0][:len(parts[0])-5]
+
+	if parts[1] == "no other bags." {
+		return rule{
+			container:  containerBag,
+			canContain: map[string]int{},
+		}, nil
+	}
 
 	childrenBags := make(map[string]int)
 	// ( contain ) (bag 1), (bag 2), ... (bag n).
