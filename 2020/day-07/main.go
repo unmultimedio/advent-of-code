@@ -34,6 +34,17 @@ func main() {
 
 	completeShinyGoldInspection()
 	fmt.Printf("amount of bags that can contain shiny gold bags: %d\n", len(shinyGoldContainers))
+
+	shinyGoldChildrenBags := countChildrenBags("shiny gold")
+	fmt.Printf("amount of bags inside a shiny gold bag: %d\n", shinyGoldChildrenBags)
+}
+
+func countChildrenBags(container string) int {
+	var childrenBags int
+	for child, amount := range rules[container].canContain {
+		childrenBags += amount + (amount * countChildrenBags(child))
+	}
+	return childrenBags
 }
 
 func completeShinyGoldInspection() {
