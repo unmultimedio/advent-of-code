@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	lines, _ := util.ReadLines("./input-small")
+	lines, _ := util.ReadLines("./input")
 	var seatMap [][]string
 
 	for _, line := range lines {
@@ -20,12 +20,14 @@ func main() {
 	iterations = append(iterations, seatMap)
 
 	for {
-		nextIt, switched := nextIterationPart2(iterations[len(iterations)-1])
+		currentIt := iterations[len(iterations)-1]
 
-		fmt.Printf("\n--- iteration %d \n", len(iterations))
-		for _, line := range nextIt {
-			fmt.Println(line)
-		}
+		// fmt.Printf("\n--- iteration %d \n", len(iterations))
+		// for _, line := range currentIt {
+		// 	fmt.Println(line)
+		// }
+
+		nextIt, switched := nextIterationPart2(currentIt)
 
 		iterations = append(iterations, nextIt)
 		if switched == 0 {
@@ -54,7 +56,8 @@ func countSeats(m [][]string) (empty int, occupied int) {
 }
 
 func nextIterationPart2(m [][]string) ([][]string, int) {
-	countVisible := func(x int, y int) (empty int, occupied int) {
+	countVisible := func(ii int, jj int) (empty int, occupied int) {
+		// fmt.Printf("\n\n--- evaluating %d, %d:\n", ii, jj)
 		// visibleChairs is an array that represents the eight directions in which
 		// the person seated can look. In these indexes:
 		//
@@ -62,6 +65,12 @@ func nextIterationPart2(m [][]string) ([][]string, int) {
 		// [3] [X] [4]
 		// [5] [6] [7]
 		visibleChairs := make([]string, 8)
+
+		printVisible := func() {
+			// fmt.Printf("\n[%s] [%s] [%s]\n", visibleChairs[0], visibleChairs[1], visibleChairs[2])
+			// fmt.Printf("[%s] [X] [%s]\n", visibleChairs[3], visibleChairs[4])
+			// fmt.Printf("[%s] [%s] [%s]\n", visibleChairs[5], visibleChairs[6], visibleChairs[7])
+		}
 
 		keepLooking := func() bool {
 			for _, c := range visibleChairs {
@@ -92,27 +101,28 @@ func nextIterationPart2(m [][]string) ([][]string, int) {
 			default:
 				panic(fmt.Sprintf("unexpected clear mode %q", mode))
 			}
+			// fmt.Printf("cleared %s\n", mode)
 		}
 
-		getIndex := func(i int, j int) int {
-			if i < x && j < y {
+		getChairIndex := func(i int, j int) int {
+			if i < ii && j < jj {
 				return 0
-			} else if i == x && j < y {
+			} else if i < ii && j == jj {
 				return 1
-			} else if i > x && j < y {
+			} else if i < ii && j > jj {
 				return 2
-			} else if i < x && j == y {
+			} else if i == ii && j < jj {
 				return 3
-			} else if i > x && j == y {
+			} else if i == ii && j > jj {
 				return 4
-			} else if i < x && j > y {
+			} else if i > ii && j < jj {
 				return 5
-			} else if i == x && j > y {
+			} else if i > ii && j == jj {
 				return 6
-			} else if i > x && j > y {
+			} else if i > ii && j > jj {
 				return 7
 			}
-			panic(fmt.Sprintf("unexpected values for getIndex %d, %d, %d, %d", i, j, x, y))
+			panic(fmt.Sprintf("unexpected values for getIndex %d, %d, %d, %d", i, j, ii, jj))
 		}
 
 		// layer is the amount of layers (think of distance from the person) in
@@ -120,7 +130,8 @@ func nextIterationPart2(m [][]string) ([][]string, int) {
 		var layer int
 		for {
 			layer++
-			for i := x - layer; i <= x+layer; i += layer {
+
+			for i := ii - layer; i <= ii+layer; i += layer {
 				if i < 0 {
 					clear("top")
 					continue
@@ -129,7 +140,7 @@ func nextIterationPart2(m [][]string) ([][]string, int) {
 					clear("bottom")
 					continue
 				}
-				for j := y - layer; j <= y+layer; j += layer {
+				for j := jj - layer; j <= jj+layer; j += layer {
 					if j < 0 {
 						clear("left")
 						continue
@@ -138,22 +149,27 @@ func nextIterationPart2(m [][]string) ([][]string, int) {
 						clear("right")
 						continue
 					}
-					if i == x && j == y {
+					if i == ii && j == jj {
+						continue
+					}
+					chairIdx := getChairIndex(i, j)
+					if len(visibleChairs[chairIdx]) > 0 {
 						continue
 					}
 
-					idx := getIndex(i, j)
 					switch m[i][j] {
 					case "L":
-						visibleChairs[idx] = "L"
+						visibleChairs[chairIdx] = "L"
 					case "#":
-						visibleChairs[idx] = "#"
+						visibleChairs[chairIdx] = "#"
 					case ".":
 					default:
 						panic(fmt.Sprintf("unrecognized character %q in map[%d][%d]", m[i][j], i, j))
 					}
+					printVisible()
 				}
 			}
+
 			if !keepLooking() {
 				break
 			}
@@ -167,6 +183,7 @@ func nextIterationPart2(m [][]string) ([][]string, int) {
 				occupied++
 			}
 		}
+
 		return empty, occupied
 	}
 
