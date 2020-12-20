@@ -8,10 +8,14 @@ import (
 	"github.com/unmultimedio/adventofcode/util"
 )
 
-type ship struct {
+type position struct {
 	lat int
 	lon int
+}
+type ship struct {
+	pos position
 	dir string
+	wp  position
 }
 
 var turns = map[string]map[string]map[int]string{
@@ -84,13 +88,13 @@ func parseInstruction(instruction string) (string, int) {
 func (s *ship) move(action string, value int) {
 	switch action {
 	case "N":
-		s.lat += value
+		s.pos.lat += value
 	case "S":
-		s.lat -= value
+		s.pos.lat -= value
 	case "E":
-		s.lon += value
+		s.pos.lon += value
 	case "W":
-		s.lon -= value
+		s.pos.lon -= value
 	case "L":
 		s.dir = turns[s.dir][action][value]
 	case "R":
@@ -110,6 +114,6 @@ func main() {
 		myShip.move(parseInstruction(instruction))
 	}
 
-	fmt.Printf("current position: %d, %d, %s\n", myShip.lat, myShip.lon, myShip.dir)
-	fmt.Printf("manhattan distance: %d\n", int(math.Abs(float64(myShip.lat))+math.Abs(float64(myShip.lon))))
+	fmt.Printf("current position: %d, %d, %s\n", myShip.pos.lat, myShip.pos.lon, myShip.dir)
+	fmt.Printf("manhattan distance: %d\n", int(math.Abs(float64(myShip.pos.lat))+math.Abs(float64(myShip.pos.lon))))
 }
