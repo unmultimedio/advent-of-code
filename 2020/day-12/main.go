@@ -69,6 +69,37 @@ var turns = map[string]map[string]map[int]string{
 	},
 }
 
+func (p position) rotate(direction string, value int) position {
+	var newPos position
+	switch direction {
+	case "R":
+		switch value {
+		case 90:
+			newPos.lat = -p.lon
+			newPos.lon = p.lat
+		case 180:
+			newPos.lat = -p.lat
+			newPos.lon = -p.lon
+		case 270:
+			newPos.lat = p.lon
+			newPos.lon = -p.lat
+		}
+	case "L":
+		switch value {
+		case 90:
+			newPos.lat = p.lon
+			newPos.lon = -p.lat
+		case 180:
+			newPos.lat = -p.lat
+			newPos.lon = -p.lon
+		case 270:
+			newPos.lat = -p.lon
+			newPos.lon = p.lat
+		}
+	}
+	return newPos
+}
+
 func parseInstruction(instruction string) (string, int) {
 	a := string(instruction[0])
 	switch a {
@@ -88,19 +119,18 @@ func parseInstruction(instruction string) (string, int) {
 func (s *ship) move(action string, value int) {
 	switch action {
 	case "N":
-		s.pos.lat += value
+		s.wp.lat += value
 	case "S":
-		s.pos.lat -= value
+		s.wp.lat -= value
 	case "E":
-		s.pos.lon += value
+		s.wp.lon += value
 	case "W":
-		s.pos.lon -= value
-	case "L":
-		s.dir = turns[s.dir][action][value]
-	case "R":
-		s.dir = turns[s.dir][action][value]
+		s.wp.lon -= value
+	case "L", "R":
+		s.wp = s.wp.rotate(action, value)
 	case "F":
-		s.move(s.dir, value)
+		s.pos.lat += value * s.wp.lat
+		s.pos.lon += value * s.wp.lon
 	default:
 		panic(fmt.Sprintf("invalid action %q", action))
 	}
@@ -109,7 +139,7 @@ func (s *ship) move(action string, value int) {
 func main() {
 	instructions, _ := util.ReadLines("./input")
 
-	myShip := ship{dir: "E"}
+	myShip := ship{dir: "E", wp: position{lat: 1, lon: 10}}
 	for _, instruction := range instructions {
 		myShip.move(parseInstruction(instruction))
 	}
