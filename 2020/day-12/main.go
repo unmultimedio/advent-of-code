@@ -116,7 +116,28 @@ func parseInstruction(instruction string) (string, int) {
 	return a, v
 }
 
-func (s *ship) move(action string, value int) {
+func (s *ship) movePart1(action string, value int) {
+	switch action {
+	case "N":
+		s.pos.lat += value
+	case "S":
+		s.pos.lat -= value
+	case "E":
+		s.pos.lon += value
+	case "W":
+		s.pos.lon -= value
+	case "L":
+		s.dir = turns[s.dir][action][value]
+	case "R":
+		s.dir = turns[s.dir][action][value]
+	case "F":
+		s.movePart1(s.dir, value)
+	default:
+		panic(fmt.Sprintf("invalid action %q", action))
+	}
+}
+
+func (s *ship) movePart2(action string, value int) {
 	switch action {
 	case "N":
 		s.wp.lat += value
@@ -141,7 +162,7 @@ func main() {
 
 	myShip := ship{dir: "E", wp: position{lat: 1, lon: 10}}
 	for _, instruction := range instructions {
-		myShip.move(parseInstruction(instruction))
+		myShip.movePart2(parseInstruction(instruction))
 	}
 
 	fmt.Printf("current position: %d, %d, %s\n", myShip.pos.lat, myShip.pos.lon, myShip.dir)
