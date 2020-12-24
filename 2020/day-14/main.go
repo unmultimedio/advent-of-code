@@ -18,14 +18,14 @@ var (
 func main() {
 	instructions, _ := util.ReadLines("./input")
 
-	// part1(instructions)
+	part1(instructions)
 	part2(instructions)
 }
 
 func part2(instructions []string) {
 	var mask, maskOr string
 	var xpos []int
-	var variations int
+	var variations int64
 	mem := make(map[int]int64)
 	for _, ins := range instructions {
 		fmt.Println("--- ", ins)
@@ -39,11 +39,11 @@ func part2(instructions []string) {
 					xpos = append(xpos, i)
 				}
 			}
-			variations = int(math.Pow(float64(2), float64(len(xpos))))
+			variations = int64(math.Pow(float64(2), float64(len(xpos))))
 
-			fmt.Printf("mask set:\n%s\n", mask)
-			fmt.Printf("xpos: %v\n", xpos)
-			fmt.Printf("address variations: %d\n", variations)
+			// fmt.Printf("mask set:\n%s\n", mask)
+			// fmt.Printf("xpos: %v\n", xpos)
+			// fmt.Printf("address variations: %d\n", variations)
 			fmt.Printf("mask or :\n%s\n", maskOr)
 			continue
 		}
@@ -53,27 +53,28 @@ func part2(instructions []string) {
 			addS, valS := m[0][1], m[0][2]
 			add, _ := strconv.Atoi(addS)
 			val, _ := strconv.Atoi(valS)
-			fmt.Printf("mem[%d]=%d\n", add, val)
+			// fmt.Printf("mem[%d]=%d\n", add, val)
 
 			nOr, _ := strconv.ParseInt(maskOr, 2, 64)
-			addToMask := int64(add) | nOr
+			addMasked := int64(add) | nOr
 
-			addBin := fmt.Sprintf("%036b", add)
-			addToMaskBin := fmt.Sprintf("%036b", addToMask)
-			fmt.Printf("add %d:\n%s\n", add, addBin)
-			fmt.Printf("add 2 mask %d:\n%s\n", addToMask, addToMaskBin)
+			// addBin := fmt.Sprintf("%036b", add)
+			addMaskedBin := fmt.Sprintf("%036b", addMasked)
+			// fmt.Printf("add %d:\n%s\n", add, addBin)
+			// fmt.Printf("add masked %d:\n%s\n", addMasked, addMaskedBin)
 
 			var addresses []int
 
-			for i := 0; i < variations; i++ {
+			var i int64
+			for i = 0; i < variations; i++ {
 				variation := fmt.Sprintf("%0*b", len(xpos), i)
-				fmt.Printf("to replace: %s\n", variation)
+				// fmt.Printf("to replace: %s\n", variation)
 				for vIdx, xIdx := range xpos {
-					addToMaskBin = replace(addToMaskBin, rune(variation[vIdx]), xIdx)
+					addMaskedBin = replace(addMaskedBin, rune(variation[vIdx]), xIdx)
 				}
 
-				newAdd, _ := strconv.ParseInt(addToMaskBin, 2, 32)
-				fmt.Printf("replaced mask %d:\n%s\n", newAdd, addToMaskBin)
+				newAdd, _ := strconv.ParseInt(addMaskedBin, 2, 64)
+				// fmt.Printf("replaced mask, new add %d:\n%s\n", newAdd, addMaskedBin)
 				addresses = append(addresses, int(newAdd))
 			}
 
@@ -90,7 +91,6 @@ func part2(instructions []string) {
 		total += val
 	}
 	fmt.Println("part 2: ", total)
-	// 43360294212 wrong answer
 }
 
 func replace(in string, r rune, i int) string {
