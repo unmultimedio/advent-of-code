@@ -13,11 +13,11 @@ func main() {
 	var lastSaid int
 	for i, n := range start {
 		memIdx1Turn[n] = i
-		fmt.Printf("%04d: %d\n", i+1, n)
+		// fmt.Printf("%04d: %d\n", i+1, n)
 	}
 	lastSaid = start[lenStart-1]
 
-	for i := lenStart; i < 2020; i++ {
+	for i := lenStart; i < 30_000_000; i++ {
 		var numToSay int
 		_, lastSaidOnce := memIdx1Turn[lastSaid]
 		if !lastSaidOnce {
@@ -30,7 +30,7 @@ func main() {
 		} else {
 			numToSay = 0
 		}
-		fmt.Printf("%04d: %d\n", i+1, numToSay)
+		// fmt.Printf("%04d: %d\n", i+1, numToSay)
 
 		_, numToSayAlreadySaid := memIdx1Turn[numToSay]
 		if numToSayAlreadySaid {
@@ -40,4 +40,5 @@ func main() {
 		memIdx1Turn[numToSay] = i
 		lastSaid = numToSay
 	}
+	fmt.Println(lastSaid)
 }
