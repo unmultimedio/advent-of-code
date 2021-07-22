@@ -97,10 +97,16 @@ func main() {
 				panic("unexpected nearby ticket value: " + vRaw)
 			}
 
+			var isWithinARange bool
 			for _, tl := range allTicketLimitations {
-				if v < tl.min || v > tl.max {
-					ticketScanningErrorRate += v
+				if v >= tl.min && v <= tl.max {
+					isWithinARange = true
+					break
 				}
+			}
+
+			if !isWithinARange {
+				ticketScanningErrorRate += v
 			}
 		}
 	}
